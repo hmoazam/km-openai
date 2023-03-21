@@ -45,7 +45,7 @@ def create_sas(blob_path, container = KB_BLOB_CONTAINER):
         )
     
     sas_url = blob_client.url + '?' + token
-    #print(f"Processing now '{blob_name}' with SAS URL {sas_url}")
+    print(f"Processing now '{blob_name}' with SAS URL {sas_url}")
     return sas_url
 
 
@@ -60,6 +60,7 @@ def save_json_document(data_dict, container = OUTPUT_BLOB_CONTAINER):
     new_doc['categoryId'] = CATEGORYID
     new_doc['timestamp']  = new_doc.get('timestamp', datetime.now().strftime("%m/%d/%Y, %H:%M:%S")),  
     new_doc['doc_url']    = new_doc.get('doc_url', f'https://microsoft.com/{str(uuid.uuid4())}')
+    print(new_doc['doc_url'])
     
     if 'content' in new_doc.keys():
         del new_doc['content']
@@ -67,7 +68,7 @@ def save_json_document(data_dict, container = OUTPUT_BLOB_CONTAINER):
     container_client = blob_service_client.get_container_client(container)
 
     try:
-        container_properties = container_client.get_container_properties()
+        container_properties = container_client.get_container_properties() 
     except Exception as e:
         container_client.create_container()
 
@@ -89,7 +90,8 @@ def list_documents(container):
     generator = container_client.list_blobs()
     blobs = []
     for blob in generator:
-       blobs.append(blob.name)
+        blob_client = blob_service_client.get_blob_client(container=container, blob=blob.name)
+        blobs.append(blob_client.url)
 
     return blobs
 

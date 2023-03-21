@@ -16,7 +16,7 @@ from utils import openai_helpers
 
 
 OVERLAP_TEXT = int(os.environ["OVERLAP_TEXT"])
-
+FR_CONTAINER = os.environ['FR_CONTAINER']
 
 ### REDIS ENTRY SCHEMA 
 """
@@ -60,7 +60,9 @@ def generate_embeddings(json_object, embedding_model, max_emb_tokens, previous_m
 
     doc_id = json_object['id']
     doc_text = json_object['text']
-    doc_url = storage.create_sas(json_object.get('doc_url', "https://microsoft.com"))
+    doc_url = storage.create_sas(json_object.get('doc_url', "https://microsoft.com"), container = FR_CONTAINER)
+    logging.info("doc_url with sas: " + doc_url)
+    logging.info("doc url: " + json_object.get('doc_url', "https://microsoft.com"))
     filename = os.path.basename(doc_url)
 
     enc = openai_helpers.get_encoder(embedding_model)
@@ -92,6 +94,7 @@ def generate_embeddings(json_object, embedding_model, max_emb_tokens, previous_m
         if suff % 100 == 0:
             print (f'Processed: {suff} embeddings for document {filename}')
             logging.info (f'Processed: {suff} embeddings for document {filename}')
+            
 
 
     print(f"This doc generated {suff} chunks")
